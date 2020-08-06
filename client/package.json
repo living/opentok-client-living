@@ -1,33 +1,4 @@
 {
-  "_args": [
-    [
-      "@opentok/client@2.17.3",
-      "/Users/lucasmonteiro/workspace-ssd/Living/delphos/svrdelphos-client"
-    ]
-  ],
-  "_from": "@opentok/client@2.17.3",
-  "_id": "@opentok/client@2.17.3",
-  "_inBundle": false,
-  "_integrity": "sha512-uKppUI2s+7Gb3qKkMykG4hH861N4L2xHHTIUvVkZb3vPDnRYbuNRLU5kIvx5ytW2xgNr1l4pqFHWIjwyfsfnSw==",
-  "_location": "/@opentok/client",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "version",
-    "registry": true,
-    "raw": "@opentok/client@2.17.3",
-    "name": "@opentok/client",
-    "escapedName": "@opentok%2fclient",
-    "scope": "@opentok",
-    "rawSpec": "2.17.3",
-    "saveSpec": null,
-    "fetchSpec": "2.17.3"
-  },
-  "_requiredBy": [
-    "/"
-  ],
-  "_resolved": "https://registry.npmjs.org/@opentok/client/-/client-2.17.3.tgz",
-  "_spec": "2.17.3",
-  "_where": "/Users/lucasmonteiro/workspace-ssd/Living/delphos/svrdelphos-client",
   "author": {
     "name": "TokBox",
     "email": "contact@tokbox.com"
