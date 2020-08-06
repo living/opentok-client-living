@@ -482,6 +482,6 @@ declare namespace OT {
   export function upgradeSystemRequirements(): void;
 }
 
-declare module "@opentok/client" {
+declare module "opentok-client-living" {
   export = OT;
 }
