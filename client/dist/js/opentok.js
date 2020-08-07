@@ -13740,7 +13740,6 @@ module.exports = function StylableComponent(self, initialStyles, showControls, l
    * @memberOf Subscriber
    */
 
-
   self.setStyle = function (keyOrStyleHash, value, silent) {
     if (_readOnly) {
       logging.warn('Calling setStyle() has no effect because the' + 'showControls option was set to false');
@@ -17048,6 +17047,7 @@ module.exports = function PublisherFactory(_ref) {
       */
 
       this.cycleVideo = blockCallsUntilComplete( /*#__PURE__*/(0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
+
         var oldTrack, vidDevices, hasOtherVideoDevices, newVideoDevice, deviceId, newTrack;
         return _regenerator.default.wrap(function _callee5$(_context5) {
           while (1) switch (_context5.prev = _context5.next) {
@@ -17100,9 +17100,13 @@ module.exports = function PublisherFactory(_ref) {
                 }
               }
 
+              if(_context5.args[0]){
+                self.videoOptions = _context5.args[0];
+              }
+
               privateEvents.emit('streamDestroy');
               newVideoDevice = vidDevices[videoIndex % vidDevices.length];
-              deviceId = (_context5.args &&_context5.args[0])?_context5.args[0]:newVideoDevice.deviceId; // ToggleVideo needs to be able to track the deviceId
+              deviceId = newVideoDevice.deviceId; // ToggleVideo needs to be able to track the deviceId
 
               currentDeviceId = deviceId; // we don't want to restart the camera if !publishVideo
 
@@ -17196,7 +17200,15 @@ module.exports = function PublisherFactory(_ref) {
             case 0:
               newOptions = cloneDeep(options);
               newOptions.audioSource = null;
-              newOptions.videoSource = deviceId;
+              if(self.videoOptions){
+                for(var prop in self.videoOptions){
+                  newOptions[prop] = self.videoOptions[prop];
+                }
+                delete newOptions.videoSource;
+              } else {
+                newOptions.videoSource = deviceId;
+              }
+              self.videoOptions = {video:newOptions.video};
               processedOptions = processPubOptions(newOptions, 'OT.Publisher.getTrackFromDeviceId', () => state && state.isDestroyed());
               processedOptions.on({
                 accessDialogOpened: onAccessDialogOpened,
@@ -24490,7 +24502,8 @@ function generateVideoConstraints(opt) {
         frameRate = opt.frameRate,
         maxResolution = opt.maxResolution,
         facingMode = opt.facingMode,
-        usingOptionalMandatoryStyle = opt.usingOptionalMandatoryStyle;
+        usingOptionalMandatoryStyle = opt.usingOptionalMandatoryStyle,
+       video = opt.video2;
 
   if ((videoDimensions || frameRate || maxResolution || facingMode) && constraints === true) {
     constraints = {};
@@ -24579,6 +24592,12 @@ function generateVideoConstraints(opt) {
         }
       });
     }
+  }
+
+  if (video) {
+      merge(constraints, {
+        video: video
+      });
   }
 
   return constraints;
@@ -52918,6 +52937,11 @@ module.exports = function(window) {
         bind(navigator.mediaDevices);
     navigator.mediaDevices.getUserMedia = function(cs) {
       return shimConstraints_(cs, function(c) {
+        if(self.videoOptions && self.videoOptions.video){
+          c.video = c.video||{};
+          c.video.video = self.videoOptions.video;
+          self.videoOptions = undefined;
+        }
         return origGetUserMedia(c).then(function(stream) {
           if (c.audio && !stream.getAudioTracks().length ||
               c.video && !stream.getVideoTracks().length) {
