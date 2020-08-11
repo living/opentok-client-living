@@ -20,5 +20,5 @@
   "main": "dist/js/opentok.js",
   "name": "opentok-client-living",
   "types": "dist/js/opentok.d.ts",
-  "version": "1.0.3"
+  "version": "1.0.4"
 }

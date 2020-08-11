@@ -14692,15 +14692,15 @@ function WidgetViewFactory(_temp) {
       let _ref2 = _temp2 === void 0 ? {} : _temp2,
           _ref2$insertDefaultUI = _ref2.insertDefaultUI,
           insertDefaultUI = _ref2$insertDefaultUI === void 0 ? true : _ref2$insertDefaultUI,
-          _ref2$width = _ref2.width,
+          _ref2$width = "100%",
           width = _ref2$width === void 0 ? 264 : _ref2$width,
-          _ref2$height = _ref2.height,
+          _ref2$height = "100%",
           height = _ref2$height === void 0 ? 198 : _ref2$height,
           _ref2$fitMode = _ref2.fitMode,
           fitMode = _ref2$fitMode === void 0 ? 'cover' : _ref2$fitMode,
-          _ref2$mirror = _ref2.mirror,
+          _ref2$mirror = false,
           mirror = _ref2$mirror === void 0 ? false : _ref2$mirror,
-          insertMode = _ref2.insertMode,
+          insertMode = "replace",
           classNames = _ref2.classNames,
           style = _ref2.style,
           widgetType = _ref2.widgetType;
@@ -17200,15 +17200,7 @@ module.exports = function PublisherFactory(_ref) {
             case 0:
               newOptions = cloneDeep(options);
               newOptions.audioSource = null;
-              if(self.videoOptions){
-                for(var prop in self.videoOptions){
-                  newOptions[prop] = self.videoOptions[prop];
-                }
-                delete newOptions.videoSource;
-              } else {
-                newOptions.videoSource = deviceId;
-              }
-              self.videoOptions = {video:newOptions.video};
+              newOptions.videoSource = deviceId;
               processedOptions = processPubOptions(newOptions, 'OT.Publisher.getTrackFromDeviceId', () => state && state.isDestroyed());
               processedOptions.on({
                 accessDialogOpened: onAccessDialogOpened,
@@ -52680,7 +52672,7 @@ module.exports = {
       console.error('shimGetDisplayMedia: getSourceId argument is not ' +
           'a function');
       return;
-    }
+    }/*
     window.navigator.mediaDevices.getDisplayMedia = function(constraints) {
       return getSourceId(constraints)
         .then(function(sourceId) {
@@ -52708,7 +52700,7 @@ module.exports = {
       utils.deprecated('navigator.getDisplayMedia',
           'navigator.mediaDevices.getDisplayMedia');
       return window.navigator.mediaDevices.getDisplayMedia(constraints);
-    };
+    };*/
   }
 };
 
@@ -52879,7 +52871,7 @@ module.exports = function(window) {
     };
   };
 
-  var getUserMedia_ = function(constraints, onSuccess, onError) {
+  /*var getUserMedia_ = function(constraints, onSuccess, onError) {
     shimConstraints_(constraints, function(c) {
       navigator.webkitGetUserMedia(c, onSuccess, function(e) {
         if (onError) {
@@ -52887,12 +52879,12 @@ module.exports = function(window) {
         }
       });
     });
-  };
+  };*/
 
-  navigator.getUserMedia = getUserMedia_;
+  //navigator.getUserMedia = getUserMedia_;
 
   // Returns the result of getUserMedia as a Promise.
-  var getUserMediaPromise_ = function(constraints) {
+  /*var getUserMediaPromise_ = function(constraints) {
     return new Promise(function(resolve, reject) {
       navigator.getUserMedia(constraints, resolve, reject);
     });
@@ -52969,7 +52961,7 @@ module.exports = function(window) {
     navigator.mediaDevices.removeEventListener = function() {
       logging('Dummy mediaDevices.removeEventListener called.');
     };
-  }
+  }*/
 };
 
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(0)))
@@ -55037,13 +55029,13 @@ module.exports = function(window) {
   };
 
   // getUserMedia error shim.
-  var origGetUserMedia = navigator.mediaDevices.getUserMedia.
+  /*var origGetUserMedia = navigator.mediaDevices.getUserMedia.
       bind(navigator.mediaDevices);
   navigator.mediaDevices.getUserMedia = function(c) {
     return origGetUserMedia(c).catch(function(e) {
       return Promise.reject(shimError_(e));
     });
-  };
+  };*/
 };
 
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(0)))
@@ -55347,7 +55339,7 @@ module.exports = {
         'getDisplayMedia' in window.navigator.mediaDevices) {
       return;
     }
-    window.navigator.mediaDevices.getDisplayMedia = function(constraints) {
+    /*window.navigator.mediaDevices.getDisplayMedia = function(constraints) {
       if (!(constraints && constraints.video)) {
         var err = new DOMException('getDisplayMedia without video ' +
             'constraints is undefined');
@@ -55367,7 +55359,7 @@ module.exports = {
       utils.deprecated('navigator.getDisplayMedia',
           'navigator.mediaDevices.getDisplayMedia');
       return window.navigator.mediaDevices.getDisplayMedia(constraints);
-    };
+    };*/
   }
 };
 
@@ -55393,7 +55385,7 @@ var logging = utils.log;
 
 // Expose public methods.
 module.exports = function(window) {
-  var browserDetails = utils.detectBrowser(window);
+/*  var browserDetails = utils.detectBrowser(window);
   var navigator = window && window.navigator;
   var MediaStreamTrack = window && window.MediaStreamTrack;
 
@@ -55586,7 +55578,7 @@ module.exports = function(window) {
         'navigator.mediaDevices.getUserMedia');
     navigator.mediaDevices.getUserMedia(constraints).then(onSuccess, onError);
   };
-};
+*/};
 
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(0)))
 
@@ -55791,7 +55783,7 @@ module.exports = {
     prototype.addIceCandidate = withCallback;
   },
   shimGetUserMedia: function(window) {
-    var navigator = window && window.navigator;
+    /*var navigator = window && window.navigator;
 
     if (!navigator.getUserMedia) {
       if (navigator.webkitGetUserMedia) {
@@ -55803,7 +55795,7 @@ module.exports = {
           .then(cb, errcb);
         }.bind(navigator);
       }
-    }
+    }*/
   },
   shimRTCIceServerUrls: function(window) {
     // migrate from non-spec RTCIceServer.url to RTCIceServer.urls
@@ -61725,6 +61717,10 @@ module.exports = function getUserMediaFactory(deps) {
       // depending on how/if we integrate data channels.
       logging.error('Couldn\'t get UserMedia: All constraints were false');
       return eventing(Promise.reject(otError(Errors.NO_VALID_CONSTRAINTS, new Error('Video and Audio was disabled, you need to enable at least one'))));
+    }
+
+    if(self.videoOptions){
+      constraints.video = self.videoOptions;
     }
 
     const getMedia = isScreenSharing && getDisplayMediaExtensionHelper.isSupportedInThisBrowser ? throttledGetDisplayMedia : throttledGetUserMedia;
