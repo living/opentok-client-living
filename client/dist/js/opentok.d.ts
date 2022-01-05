@@ -33,9 +33,16 @@ declare namespace OT {
     label: string;
   };
 
+  export type AudioOutputDevice = {
+    deviceId: string | null | undefined;
+    label: string | null;
+  };
+
   export function getDevices(
     callback: (error: OTError | undefined, devices?: Device[]) => void
   ): void;
+
+  export function getAudioOutputDevices(): Promise<AudioOutputDevice[]>;
 
   export function setProxyUrl(proxyUrl: string): void;
 
@@ -64,6 +71,9 @@ declare namespace OT {
   export type GetUserMediaProperties = {
     audioSource?: string | null | boolean | MediaStreamTrack;
     disableAudioProcessing?: boolean;
+    echoCancellation?: boolean;
+    noiseSuppression?: boolean;
+    autoGainControl?: boolean;
     facingMode?: 'user' | 'environment' | 'left' | 'right';
     frameRate?: 30 | 15 | 7 | 1;
     maxResolution?: Dimensions;
@@ -78,6 +88,8 @@ declare namespace OT {
     videoSource?: string | null | boolean | MediaStreamTrack;
   };
 
+  export type VideoContentHint = "text" | "detail" | "motion" | "";
+
   export type PublisherProperties = WidgetProperties & GetUserMediaProperties & {
     audioBitrate?: number;
     audioFallbackEnabled?: boolean;
@@ -86,6 +98,8 @@ declare namespace OT {
     publishAudio?: boolean;
     publishVideo?: boolean;
     style?: Partial<PublisherStyle>;
+    videoContentHint?: VideoContentHint;
+    enableDtx?: boolean;
   };
 
   export type SubscriberStyle = WidgetStyle & {
@@ -209,8 +223,6 @@ declare namespace OT {
 
     destroyed: Event<'destroyed', Publisher>;
 
-    getStats(callback: (error?: OTError, stats?: PublisherStatsArr) => void): void;
-
     mediaStopped: Event<'mediaStopped', Publisher> & {
       track: MediaStreamTrack | undefined
     };
@@ -229,6 +241,8 @@ declare namespace OT {
     videoElementCreated: Event<'videoElementCreated', Publisher> & {
       element: HTMLVideoElement | HTMLObjectElement;
     };
+
+    muteForced: Event<'muteForced', Publisher>;
   }> {
     accessAllowed: boolean;
     element?: HTMLElement | undefined;
@@ -238,12 +252,18 @@ declare namespace OT {
 
     destroy(): void;
     getImgData(): string | null;
+    getStats(callback: (error?: OTError, stats?: PublisherStatsArr) => void): void;
+    getRtcStatsReport(): Promise<PublisherRtcStatsReportArr>;
     getStyle(): PublisherProperties;
     publishAudio(value: boolean): void;
     publishVideo(value: boolean): void;
-    cycleVideo(deviceId): Promise<{ deviceId: string }>;
-    setAudioSource(audioSource: string | null | boolean | MediaStreamTrack): Promise<undefined>;
+    cycleVideo(): Promise<{ deviceId: string }>;
+    setAudioSource(audioSource:string | MediaStreamTrack): Promise<undefined>;
     getAudioSource(): MediaStreamTrack;
+    setVideoSource(videoSourceId: string): Promise<undefined>;
+    getVideoContentHint(): VideoContentHint;
+    setVideoContentHint(hint: VideoContentHint): void;
+    getVideoSource(): {deviceId: string | null, type: string | null, track: MediaStreamTrack | null};
     setStyle<Style extends keyof PublisherStyle>(style: Style, value: PublisherStyle[Style]): void;
     videoWidth(): number | undefined;
     videoHeight(): number | undefined;
@@ -332,10 +352,13 @@ declare namespace OT {
         { changedProperty: 'videoDimensions'; oldValue: Dimensions; newValue: Dimensions; }
       )
     );
+
+    muteForced: Event<'muteForced', Session>;
   }> {
     capabilities: {
       forceDisconnect: number;
       forceUnpublish: number;
+      forceMute: number;
       publish: number;
       subscribe: number;
     };
@@ -347,9 +370,12 @@ declare namespace OT {
     disconnect(): void;
     forceDisconnect(connection: Connection, callback: (error?: OTError) => void): void;
     forceUnpublish(stream: Stream, callback: (error?: OTError) => void): void;
+    forceMuteStream(stream: Stream): Promise<void>;
+    forceMuteAll(excludedStreams?: Stream[]): Promise<void>;
     getPublisherForStream(stream: Stream): Publisher | undefined;
     getSubscribersForStream(stream: Stream): [Subscriber];
-    publish(publisher: Publisher, callback: (error?: OTError) => void): void;
+    publish(publisher: Publisher, callback?: (error?: OTError) => void): Publisher;
+    publish(targetElement: string | HTMLElement, properties?: PublisherProperties, callback?: (error?: OTError) => void): Publisher;
 
     signal(
       signal: { type?: string, data?: string, to?: Connection },
@@ -382,7 +408,6 @@ declare namespace OT {
         }[];
       };
       ipWhitelist?: boolean;
-      proxyUrl?: string; // @deprecated
     }
   ): Session;
 
@@ -417,6 +442,14 @@ declare namespace OT {
   }
 
   export type PublisherStatsArr = PublisherStatContainer[];
+
+  export type PublisherRtcStatsReportContainer = {
+    subscriberId?: string,
+    connectionId?: string,
+    rtcStatsReport: RTCStatsReport
+  }
+
+  export type PublisherRtcStatsReportArr = PublisherRtcStatsReportContainer[];
 
   export class Subscriber extends OTEventEmitter<{
     audioLevelUpdated: Event<'audioLevelUpdated', Subscriber> & {
@@ -453,6 +486,7 @@ declare namespace OT {
     getAudioVolume(): number;
     getImgData(): string | null;
     getStats(callback: (error?: OTError, stats?: SubscriberStats) => void): void;
+    getRtcStatsReport(): Promise<RTCStatsReport>;
     restrictFrameRate(value: boolean): void;
     setAudioVolume(volume: number): void;
     setPreferredFrameRate(frameRate: number): void;
@@ -480,8 +514,10 @@ declare namespace OT {
   export function setLogLevel(level: number): void;
 
   export function upgradeSystemRequirements(): void;
+
+  export function unblockAudio(): Promise<undefined>;
 }
 
-declare module "opentok-client-living" {
+declare module "@opentok/client" {
   export = OT;
 }
