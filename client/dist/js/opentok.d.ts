@@ -518,6 +518,6 @@ declare namespace OT {
   export function unblockAudio(): Promise<undefined>;
 }
 
-declare module "@opentok/client" {
+declare module "opentok-client-living" {
   export = OT;
 }
