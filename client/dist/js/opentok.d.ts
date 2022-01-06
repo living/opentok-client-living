@@ -258,6 +258,7 @@ declare namespace OT {
     publishAudio(value: boolean): void;
     publishVideo(value: boolean): void;
     cycleVideo(): Promise<{ deviceId: string }>;
+    setMirror(mirror:boolean): void;
     setAudioSource(audioSource:string | MediaStreamTrack): Promise<undefined>;
     getAudioSource(): MediaStreamTrack;
     setVideoSource(videoSourceId: string): Promise<undefined>;

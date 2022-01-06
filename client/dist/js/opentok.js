@@ -15162,6 +15162,7 @@ function WidgetViewFactory(_temp) {
         logging.warn(`Invalid fit value "${fitMode}" passed. Only "contain" and "cover" can be used.`);
       }
 
+      this._mirror = mirror;
       this._widgetType = widgetType;
       this._fitMode = fitMode;
       this._insertDefaultUI = insertDefaultUI;
@@ -15190,9 +15191,15 @@ function WidgetViewFactory(_temp) {
         this._container.style.overflow = 'hidden';
         fixMini(this._container);
 
-        if (mirror) {
-          OTHelpers.addClass(this._container, 'OT_mirrored');
-        }
+        this._checkMirror = (mirror) => {
+          if (mirror === undefined ? this._mirror : mirror) {
+            OTHelpers.addClass(this._container, 'OT_mirrored');
+          } else {
+            OTHelpers.removeClass(this._container, 'OT_mirrored');
+          }
+        };
+
+        this._checkMirror();
 
         if (classNames) {
           // @todo Refactor to avoid passing classNames to widgetView
@@ -18167,9 +18174,14 @@ module.exports = function PublisherFactory(_ref) {
       * @see <a href="#setVideoSource">Publisher.setVideoSource()</a>
       */
 
+      this.setMirror = (mirror) => {
+        widgetView._mirror = mirror;
+      }
+
       this.cycleVideo = blockCallsUntilComplete( /*#__PURE__*/(0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee13() {
         var oldTrack, vidDevices, hasOtherVideoDevices, newVideoDevice, deviceId;
         return _regenerator.default.wrap(function _callee13$(_context13) {
+          
           while (1) switch (_context13.prev = _context13.next) {
             case 0:
               if (!(OTHelpers.env.isLegacyEdge || !windowMock.RTCRtpSender || typeof windowMock.RTCRtpSender.prototype.replaceTrack !== 'function')) {
@@ -18226,6 +18238,7 @@ module.exports = function PublisherFactory(_ref) {
 
             case 19:
             case "end":
+              widgetView._checkMirror();
               return _context13.stop();
           }
         }, _callee13);
@@ -62227,17 +62240,6 @@ module.exports = function processPubOptionsFactory(deps) {
         usingOptionalMandatoryStyle: usingOptionalMandatoryStyle(isScreenSharing)
       }));
       constraintInfo.video = properties.video;
-      if(typeof(constraintInfo.constraints.video) == 'object'){
-        constraintInfo.constraints.video.mirrored = properties.video.mirrored;
-        constraintInfo.constraints.video.mirror = properties.video.mirror;
-        constraintInfo.constraints.video.insertMode = properties.video.insertMode;
-      } else {
-        constraintInfo.constraints.video = {
-          mirrored: properties.video.mirrored,
-          mirror: properties.video.mirror,
-          insertMode: properties.video.insertMode
-        }
-      }
       assign(properties, constraintInfo);
     } else {
       logging.warn(`${logPrefix}: You have passed your own constraints not using ours`);
