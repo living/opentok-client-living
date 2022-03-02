@@ -15162,6 +15162,7 @@ function WidgetViewFactory(_temp) {
         logging.warn(`Invalid fit value "${fitMode}" passed. Only "contain" and "cover" can be used.`);
       }
 
+      //////LIVINGNET/////
       this._mirror = mirror;
       this._widgetType = widgetType;
       this._fitMode = fitMode;
@@ -15191,6 +15192,7 @@ function WidgetViewFactory(_temp) {
         this._container.style.overflow = 'hidden';
         fixMini(this._container);
 
+        //////LIVINGNET/////
         this._checkMirror = (mirror) => {
           if (mirror === undefined ? this._mirror : mirror) {
             OTHelpers.addClass(this._container, 'OT_mirrored');
@@ -15198,7 +15200,6 @@ function WidgetViewFactory(_temp) {
             OTHelpers.removeClass(this._container, 'OT_mirrored');
           }
         };
-
         this._checkMirror();
 
         if (classNames) {
@@ -18174,9 +18175,11 @@ module.exports = function PublisherFactory(_ref) {
       * @see <a href="#setVideoSource">Publisher.setVideoSource()</a>
       */
 
+      //////LIVINGNET/////
       this.setMirror = (mirror) => {
         widgetView._mirror = mirror;
       }
+      var _self_ = this;
 
       this.cycleVideo = blockCallsUntilComplete( /*#__PURE__*/(0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee13() {
         var oldTrack, vidDevices, hasOtherVideoDevices, newVideoDevice, deviceId;
@@ -18228,6 +18231,12 @@ module.exports = function PublisherFactory(_ref) {
               privateEvents.emit('streamDestroy');
               newVideoDevice = vidDevices[videoIndex % vidDevices.length];
               deviceId = newVideoDevice.deviceId;
+
+              //////LIVINGNET/////
+              if(_self_.onNextVideoDeviceId){
+                _self_.onNextVideoDeviceId(deviceId);
+              }
+
               _context13.next = 18;
               return attemptToSetVideoTrack(deviceId);
 
@@ -18238,6 +18247,7 @@ module.exports = function PublisherFactory(_ref) {
 
             case 19:
             case "end":
+              //////LIVINGNET/////
               widgetView._checkMirror();
               return _context13.stop();
           }
